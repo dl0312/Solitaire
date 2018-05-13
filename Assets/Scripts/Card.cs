@@ -17,8 +17,14 @@ public class Card : MonoBehaviour
     public enum Shape { Heart, Diamond, Clova, Spade };
     public int shape;
 
+    public int playedDeckLine;
+
+    public int playedDectLineIndex;
+
     public bool color = false;	// red : false, black : true
     public int number;
+
+    public GameObject thisObject;
 
     public Sprite White;
     // Use this for initialization
@@ -37,6 +43,12 @@ public class Card : MonoBehaviour
         }
     }
 
+    public void setPosition(int line, int lineIndex)
+    {
+        this.playedDeckLine = line;
+        this.playedDectLineIndex = lineIndex;
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -48,15 +60,27 @@ public class Card : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            thisPosition = transform.position;
-            for (int i = 0; i < 7; i++)
+            if (this.playedDectLineIndex == GameController.playedDeck[this.playedDeckLine])
             {
-                if ((int)(thisPosition.x - GameController.playedMagnetPlaces[i].x) == 0)
+                thisPosition = transform.position;
+                for (int i = 0; i < 7; i++)
                 {
-                    presentLine = i;
+                    if ((int)(thisPosition.x - GameController.playedMagnetPlaces[i].x) == 0)
+                    {
+                        presentLine = i;
+                    }
+                }
+                thisObject = GameController.playedDeckList[presentLine][GameController.playedDeck[presentLine]];
+                Debug.Log(thisPosition);
+            }
+            else
+            {
+                for (int i = this.playedDectLineIndex; i <= GameController.playedDeck[this.playedDeckLine]; i++)
+                {
+                    // GameController.playedDeckList[this.playedDeckLine]
+                    // object1.transform.parent
                 }
             }
-            Debug.Log(thisPosition);
         }
     }
 
@@ -78,12 +102,18 @@ public class Card : MonoBehaviour
         objPosition = Camera.main.ScreenToWorldPoint(mousePosition);
         for (int i = 0; i < 7; i++)
         {
-            if ((int)((objPosition.x - GameController.playedMagnetPlaces[i].x - 1.0f) / 2.0f) == 0)
+            if ((int)((objPosition.x - GameController.playedMagnetPlaces[i].x + 1.0f) / 2.0f) == 0)
             {
                 targetLine = i;
-                Debug.Log(GameController.playedDeckList[targetLine].Peek().GetComponent<Card>().number + "," + (this.number));
-                if (GameController.playedDeckList[targetLine].Peek().GetComponent<Card>().number == (this.number + 1) % 13
-                && GameController.playedDeckList[targetLine].Peek().GetComponent<Card>().color != this.color)
+                Debug.Log("presentLine: " + this.presentLine);
+
+                Debug.Log("GameController.playedDeck[this.presentLine]: " + GameController.playedDeck[this.presentLine]);
+
+                Debug.Log("target line: " + targetLine + " targetLine state: " + GameController.playedDeck[targetLine]);
+                GameObject targetObject = GameController.playedDeckList[targetLine][GameController.playedDeck[targetLine] - 1];
+                Debug.Log("target number " + targetObject.GetComponent<Card>().number + ", present number " + (this.number));
+                if (targetObject.GetComponent<Card>().number == (this.number + 1) % 13
+                && targetObject.GetComponent<Card>().color != this.color)
                 {
                     if (presentLine != targetLine)
                     {
@@ -94,26 +124,32 @@ public class Card : MonoBehaviour
                         {
                             transform.GetChild(j).GetComponent<SpriteRenderer>().sortingOrder = order + 1;
                         }
+                        if (GameController.playedDeck[presentLine] > 0)
+                        {
+                            Debug.Log("we are in coveredcard");
+                            Debug.Log("GameController.playedDeck[this.presentLine]: " + GameController.playedDeck[this.presentLine]);
+                            GameObject CoveredCard = GameController.playedDeckList[presentLine][GameController.playedDeck[this.presentLine] - 1];
+                            CoveredCard.GetComponent<BoxCollider2D>().enabled = true;
+                            for (int k = 0; k < 4; k++)
+                            {
+                                CoveredCard.transform.GetChild(k).GetComponent<Renderer>().enabled = true;
+                                CoveredCard.transform.GetChild(k).GetComponent<SpriteRenderer>().sortingOrder =
+                                CoveredCard.GetComponent<SpriteRenderer>().sortingOrder + 1;
+                            }
+                            CoveredCard.GetComponent<SpriteRenderer>().sprite = White;
+                        }
                         transform.position = GameController.playedMagnetPlaces[i];
                         GameController.playedDeck[presentLine]--;
-                        GameController.playedMagnetPlaces[presentLine].y -= GameController.y_offset;
+                        GameController.playedMagnetPlaces[presentLine].y += GameController.y_offset;
                         GameController.playedDeck[targetLine]++;
-                        GameController.playedMagnetPlaces[targetLine].y += GameController.y_offset;
-                        GameController.playedDeckList[targetLine].Push(GameController.playedDeckList[presentLine].Pop());
-
-                        GameObject CoveredCard = GameController.playedDeckList[presentLine].Peek();
-                        CoveredCard.GetComponent<BoxCollider2D>().enabled = true;
-                        for (int k = 0; k < 4; k++)
-                        {
-                            CoveredCard.transform.GetChild(k).GetComponent<Renderer>().enabled = true;
-                            CoveredCard.transform.GetChild(k).GetComponent<SpriteRenderer>().sortingOrder =
-                            CoveredCard.GetComponent<SpriteRenderer>().sortingOrder + 1;
-                        }
-                        CoveredCard.GetComponent<SpriteRenderer>().sprite = White;
-                        Debug.Log("present" + GameController.playedMagnetPlaces[presentLine]);
-                        Debug.Log("target" + GameController.playedMagnetPlaces[targetLine]);
+                        GameController.playedMagnetPlaces[targetLine].y -= GameController.y_offset;
+                        this.setPosition(targetLine, GameController.playedDeck[targetLine] - 1);
+                        Debug.Log("shifted to present " + presentLine + "target " + targetLine);
+                        GameController.playedDeckList[targetLine].Add(thisObject);
+                        GameController.playedDeckList[presentLine].Remove(thisObject);
                     }
                 }
+                break;
             }
         }
 

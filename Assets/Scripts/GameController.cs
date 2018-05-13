@@ -5,11 +5,11 @@ using UnityEngine;
 public class GameController : MonoBehaviour
 {
 
-    public static Stack<GameObject>[] playedDeckList = new Stack<GameObject>[7];
+    public static List<GameObject>[] playedDeckList = new List<GameObject>[7];
 
     public float time = 0;
     public int point = 0;
-    public int move_cnt = 0;
+    public static int move_cnt = 0;
     public int[] deck = new int[52];
     public static Card[,] cards = new Card[4, 13];
     public GameObject card;
@@ -41,7 +41,7 @@ public class GameController : MonoBehaviour
 
         for (int i = 0; i < 7; i++)
         {
-            playedDeckList[i] = new Stack<GameObject>();
+            playedDeckList[i] = new List<GameObject>();
         }
         for (int i = 0; i < 52; i++)
         {
@@ -68,7 +68,7 @@ public class GameController : MonoBehaviour
                 GameObject temp = Instantiate(card, playedDeckPlace[i] + new Vector2(0, j * (-y_offset)), Quaternion.identity) as GameObject;
                 if (j == i)
                 {
-                    playedDeckList[i].Push(temp);
+                    playedDeckList[i].Add(temp);
                     temp.GetComponent<SpriteRenderer>().sprite = White;
                     temp.GetComponent<SpriteRenderer>().sortingOrder = i + 1;
                     temp.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = Simbols[tmpshape];
@@ -112,44 +112,45 @@ public class GameController : MonoBehaviour
                     }
                     temp.GetComponent<BoxCollider2D>().enabled = true;
                     temp.GetComponent<Card>().setNumber(tmpshape, tmpnumber);
+                    temp.GetComponent<Card>().setPosition(i, j);
                 }
                 else
                 {
-                    playedDeckList[i].Push(temp);
+                    playedDeckList[i].Add(temp);
                     temp.GetComponent<SpriteRenderer>().sortingOrder = j + 1;
                     temp.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = Simbols[tmpshape];
                     temp.transform.GetChild(3).GetComponent<SpriteRenderer>().sprite = smallSimbols[tmpshape];
 
                     if (tmpshape < 2)
                     {
-                        if (tmpshape == 0)
+                        if (tmpnumber == 0)
                         {
                             temp.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = RedNumbers[13];
                         }
-                        else if (tmpshape == 10)
+                        else if (tmpnumber == 10)
                         {
-                            temp.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = RedNumbers[tmpshape];
+                            temp.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = RedNumbers[tmpnumber];
                             temp.transform.GetChild(2).GetComponent<SpriteRenderer>().sprite = RedNumbers[0];
                         }
                         else
                         {
-                            temp.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = RedNumbers[tmpshape];
+                            temp.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = RedNumbers[tmpnumber];
                         }
                     }
                     else
                     {
-                        if (tmpshape == 0)
+                        if (tmpnumber == 0)
                         {
                             temp.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = BlackNumbers[13];
                         }
-                        else if (tmpshape == 10)
+                        else if (tmpnumber == 10)
                         {
-                            temp.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = BlackNumbers[tmpshape];
+                            temp.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = BlackNumbers[tmpnumber];
                             temp.transform.GetChild(2).GetComponent<SpriteRenderer>().sprite = BlackNumbers[0];
                         }
                         else
                         {
-                            temp.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = BlackNumbers[tmpshape];
+                            temp.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = BlackNumbers[tmpnumber];
                         }
                     }
                     for (int k = 0; k < 4; k++)
@@ -157,9 +158,10 @@ public class GameController : MonoBehaviour
                         temp.transform.GetChild(k).GetComponent<SpriteRenderer>().sortingOrder = i + 2;
                     }
                     temp.GetComponent<Card>().setNumber(tmpshape, tmpnumber);
+                    temp.GetComponent<Card>().setPosition(i, j);
+
                 }
                 decktmp++;
-
             }
             playedMagnetPlaces[i] = playedDeckPlace[i] + new Vector2(0, (i + 1) * (-y_offset));
         }
