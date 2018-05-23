@@ -68,7 +68,12 @@ public class MouseDrag : MonoBehaviour
                         GetComponent<SpriteRenderer>().sortingOrder = order;
                         for (int j = 0; j < 4; j++)
                         {
-                            transform.GetChild(j).GetComponent<SpriteRenderer>().sortingOrder = order + 1;
+                            if (j == 0)
+                            {
+                                transform.GetChild(j).GetComponent<SpriteRenderer>().sortingOrder = order;
+                            }
+                            else { transform.GetChild(j).GetComponent<SpriteRenderer>().sortingOrder = order + 1; }
+
                         }
                         transform.position = GameController.playedMagnetPlaces[i];
                         GameController.playedDeck[presentLine]--;
